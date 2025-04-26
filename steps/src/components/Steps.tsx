@@ -49,20 +49,27 @@ const Steps = () => {
         if (isNaN(parsedDistance)) return;
 
         setSteps(prev => {
-            const updated = [...prev];
-            const existing = updated.find(step => step.date === date);
+            const existing = prev.find(step => step.date === date);
 
             if (existing) {
-                existing.distance += parsedDistance;
+                return prev
+                    .map(step =>
+                        step.date === date
+                            ? { ...step, distance: step.distance + parsedDistance }
+                            : step
+                    )
+                    .sort((a, b) => {
+                        const [d1, m1, y1] = a.date.split('.').map(Number);
+                        const [d2, m2, y2] = b.date.split('.').map(Number);
+                        return new Date(y2, m2 - 1, d2).getTime() - new Date(y1, m1 - 1, d1).getTime();
+                    });
             } else {
-                updated.push({ date, distance: parsedDistance });
+                return [...prev, { date, distance: parsedDistance }].sort((a, b) => {
+                    const [d1, m1, y1] = a.date.split('.').map(Number);
+                    const [d2, m2, y2] = b.date.split('.').map(Number);
+                    return new Date(y2, m2 - 1, d2).getTime() - new Date(y1, m1 - 1, d1).getTime();
+                });
             }
-            
-            return updated.sort((a, b) => {
-                const [d1, m1, y1] = a.date.split('.').map(Number);
-                const [d2, m2, y2] = b.date.split('.').map(Number);
-                return new Date(y2, m2 - 1, d2).getTime() - new Date(y1, m1 - 1, d1).getTime();
-            });
         });
 
         setForm({ date: '', distance: '' });
